@@ -652,3 +652,21 @@ document.getElementById('copy-bitcoin').addEventListener('click',async function(
   }
 }
 </style>
+<style id="donorbox-payment-height-fix">
+/* Keep the complete Donorbox payment step clickable inside both matching panels. */
+@media(min-width:1001px){
+  .desktop-story-grid>.equipment-feature,
+  .desktop-story-grid>.prelaunch-donor{
+    height:920px!important;
+    min-height:920px!important;
+    max-height:920px!important;
+  }
+  .desktop-story-grid>.prelaunch-donor>.donorbox-live,
+  .desktop-story-grid>.prelaunch-donor>.donorbox-live dbox-widget{
+    height:780px!important;
+    min-height:780px!important;
+    max-height:780px!important;
+  }
+  .desktop-story-grid>.prelaunch-donor>.donorbox-live{overflow:visible!important}
+}
+</style>
