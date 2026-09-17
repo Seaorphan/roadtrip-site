@@ -215,3 +215,29 @@ document.getElementById('copy-bitcoin').addEventListener('click',async function(
   .prelaunch-donor>.donorbox-live dbox-widget{width:100%!important;min-height:620px!important;transform:none!important}
 }
 </style>
+<style>
+/* Final sponsor scale for large desktop displays. */
+@media (min-width:901px){
+  .prelaunch-donor{max-width:1500px!important;min-height:0!important;gap:70px!important;padding:58px!important;align-items:start!important}
+  .prelaunch-donor>strong{font-size:clamp(48px,3.3vw,64px)!important;line-height:1!important;margin:18px 0 30px!important}
+  .prelaunch-donor>.giving-note{font-size:clamp(18px,1.15vw,22px)!important;line-height:1.65!important;max-width:560px!important}
+  .prelaunch-donor>.sponsor-options{max-width:560px!important;margin-top:32px!important}
+  .prelaunch-donor>.sponsor-options a,.prelaunch-donor>.sponsor-options button{font-size:14px!important;min-height:54px!important}
+  .prelaunch-donor>.credits-note{font-size:clamp(27px,1.7vw,34px)!important;max-width:560px!important;margin-top:42px!important;padding-top:26px!important}
+  .prelaunch-donor>.donorbox-live{width:520px!important;max-width:100%!important;min-height:0!important;transform:translateX(24px)!important;overflow:visible!important}
+  .prelaunch-donor>.donorbox-live dbox-widget{width:100%!important;min-height:600px!important;transform:none!important}
+}
+@media (min-width:1800px){
+  .prelaunch-donor{max-width:1700px!important;gap:90px!important;padding:65px!important}
+  .prelaunch-donor>strong{font-size:68px!important}
+  .prelaunch-donor>.giving-note{font-size:23px!important;max-width:620px!important}
+  .prelaunch-donor>.sponsor-options{max-width:620px!important}
+  .prelaunch-donor>.credits-note{font-size:36px!important;max-width:620px!important;margin-top:46px!important;padding-top:28px!important}
+  .prelaunch-donor>.donorbox-live{width:560px!important;max-width:560px!important;transform:translateX(28px)!important}
+  .prelaunch-donor>.donorbox-live dbox-widget{width:100%!important;min-height:620px!important;transform:none!important}
+}
+</style>
+<style>
+/* Centre the complete sponsor panel within the page. */
+.prelaunch-donor{margin-left:auto!important;margin-right:auto!important}
+</style>
