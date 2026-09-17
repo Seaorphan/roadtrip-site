@@ -670,3 +670,6 @@ document.getElementById('copy-bitcoin').addEventListener('click',async function(
   .desktop-story-grid>.prelaunch-donor>.donorbox-live{overflow:visible!important}
 }
 </style>
+<script id="roadtrip-visitor-tracking">
+(()=>{try{let id=localStorage.getItem('rtrVisitorId');if(!id){id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);localStorage.setItem('rtrVisitorId',id)}fetch('https://caolan.report/wp-json/caolan-report/v1/road-trip/visit?visitor='+encodeURIComponent(id),{method:'POST',mode:'cors',keepalive:true}).catch(()=>{})}catch(e){}})();
+</script>
