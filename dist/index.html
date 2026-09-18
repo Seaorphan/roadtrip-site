@@ -670,3 +670,28 @@ const car=L.marker([stops[0].lat,stops[0].lng],{interactive:false,zIndexOffset:1
 <script id="roadtrip-visitor-tracking">
 (()=>{try{let id=localStorage.getItem('rtrVisitorId');if(!id){id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);localStorage.setItem('rtrVisitorId',id)}fetch('https://caolan.report/wp-json/caolan-report/v1/road-trip/visit?visitor='+encodeURIComponent(id),{method:'POST',mode:'cors',keepalive:true}).catch(()=>{})}catch(e){}})();
 </script>
+
+<style id="donorbox-responsive-fix">
+/* Keep the external Donorbox widget inside its panel at normal desktop zoom. */
+@media(min-width:1001px){
+  .desktop-story-grid>.prelaunch-donor{
+    grid-template-columns:minmax(190px,.9fr) minmax(0,1.1fr)!important;
+    column-gap:clamp(18px,1.8vw,28px)!important;
+    padding:clamp(28px,2.3vw,40px)!important;
+  }
+  .desktop-story-grid>.prelaunch-donor>.donorbox-live{
+    box-sizing:border-box!important;
+    width:100%!important;
+    max-width:460px!important;
+    min-width:0!important;
+    justify-self:end!important;
+    overflow:visible!important;
+  }
+  .desktop-story-grid>.prelaunch-donor>.donorbox-live dbox-widget{
+    display:block!important;
+    width:100%!important;
+    max-width:460px!important;
+    min-width:0!important;
+  }
+}
+</style>
