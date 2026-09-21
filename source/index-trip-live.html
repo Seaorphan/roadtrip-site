@@ -111,9 +111,9 @@ stops.forEach((s,i)=>{
   if(i===0)return;
   const prev=stops[i-1];
   const path=(Array.isArray(s.route)&&s.route.length>1)?s.route:[[prev.lat,prev.lng],[s.lat,s.lng]];
-  L.polyline(path,{color:'#22384a',weight:9,opacity:.28,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);
-  L.polyline(path,{color:'#35526b',weight:5,opacity:.5,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);
-  L.polyline(path,{color:'#4d7396',weight:2,opacity:.95,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);
+  L.polyline(path,{color:'#2173c8',weight:12,opacity:.25,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);
+  L.polyline(path,{color:'#3d8fe0',weight:6,opacity:.45,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);
+  L.polyline(path,{color:'#bfe4ff',weight:2,opacity:1,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);
 });
 const markers=stops.map((s,i)=>{
   const isVideoStop=s.type==='video'&&s.video;
