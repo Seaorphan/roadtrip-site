@@ -154,24 +154,27 @@ function trackReportView(s,i){
 document.querySelectorAll('[data-stop]').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.stop;trackReportView(stops[i],i);map.flyTo([stops[i].lat,stops[i].lng],8,{duration:.8});setTimeout(()=>markers[i].openPopup(),850)}));
 
 if(stops.length>1){
-const last=stops.length-1;
-const lastLeg=(Array.isArray(stops[last].route)&&stops[last].route.length>1)?stops[last].route:[[stops[last-1].lat,stops[last-1].lng],[stops[last].lat,stops[last].lng]];
+const fullPath=[[stops[0].lat,stops[0].lng]];
+for(let i=1;i<stops.length;i++){
+  const leg=(Array.isArray(stops[i].route)&&stops[i].route.length>1)?stops[i].route:[[stops[i-1].lat,stops[i-1].lng],[stops[i].lat,stops[i].lng]];
+  for(let j=1;j<leg.length;j++)fullPath.push(leg[j]);
+}
 const legDistances=[];let totalDistance=0;
-for(let i=1;i<lastLeg.length;i++){const d=map.distance(lastLeg[i-1],lastLeg[i]);legDistances.push(d);totalDistance+=d;}
+for(let i=1;i<fullPath.length;i++){const d=map.distance(fullPath[i-1],fullPath[i]);legDistances.push(d);totalDistance+=d;}
 function pointAlong(p){
-  if(totalDistance===0)return lastLeg[0];
+  if(totalDistance===0)return fullPath[0];
   let target=p*totalDistance,covered=0;
   for(let i=0;i<legDistances.length;i++){
     if(covered+legDistances[i]>=target){
       const segP=legDistances[i]?(target-covered)/legDistances[i]:0;
-      const a=lastLeg[i],b=lastLeg[i+1];
+      const a=fullPath[i],b=fullPath[i+1];
       return[a[0]+(b[0]-a[0])*segP,a[1]+(b[1]-a[1])*segP];
     }
     covered+=legDistances[i];
   }
-  return lastLeg[lastLeg.length-1];
+  return fullPath[fullPath.length-1];
 }
-const car=L.marker(lastLeg[0],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:'trail-dot',html:'<span></span>',iconSize:[12,12],iconAnchor:[6,6]})}).addTo(map);let start;function animate(t){if(!start)start=t;let p=((t-start)%24000)/24000;p=p<.12?0:p>.88?1:(p-.12)/.76;const ease=p*p*(3-2*p);car.setLatLng(pointAlong(ease));requestAnimationFrame(animate)}if(!matchMedia('(prefers-reduced-motion: reduce)').matches)requestAnimationFrame(animate);
+const car=L.marker(fullPath[0],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:'trail-dot',html:'<span></span>',iconSize:[12,12],iconAnchor:[6,6]})}).addTo(map);let start;const cycleDuration=8000+stops.length*3000;function animate(t){if(!start)start=t;let p=((t-start)%cycleDuration)/cycleDuration;p=p<.06?0:p>.94?1:(p-.06)/.88;const ease=p*p*(3-2*p);car.setLatLng(pointAlong(ease));requestAnimationFrame(animate)}if(!matchMedia('(prefers-reduced-motion: reduce)').matches)requestAnimationFrame(animate);
 }
 });
 </script><script>(function(){const toggle=document.getElementById('bitcoin-toggle'),details=document.getElementById('bitcoin-details'),copy=document.getElementById('copy-bitcoin'),status=document.getElementById('bitcoin-status'),address=document.getElementById('bitcoin-address');if(toggle&&details){toggle.addEventListener('click',()=>{const open=details.hidden;details.hidden=!open;toggle.setAttribute('aria-expanded',String(open));});}if(copy&&address){copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(address.textContent.trim());status.textContent='Address copied.';}catch(e){status.textContent='Select and copy the address above.';}});}})();</script></body></html>
