@@ -111,13 +111,14 @@ const markers=stops.map((s,i)=>{
   const m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:pinHtml,iconSize:isVideoStop?[30,30]:[14,14],iconAnchor:isVideoStop?[15,15]:[7,7]})}).addTo(map);const videoHtml=s.type==='video'&&s.video?'<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/'+s.video+'" title="'+escapeHtml(s.title)+'" allowfullscreen></iframe></div>':'';m.bindPopup('<div class="popup"><small>'+escapeHtml(s.place)+'</small><h3>'+escapeHtml(s.title)+'</h3>'+videoHtml+'<p>'+escapeHtml(s.copy)+'</p></div>',{maxWidth:310});return m});
 
 const cardsEl=document.getElementById('reportCards');
-cardsEl.innerHTML=stops.map((s,i)=>{
-  const isVideo=s.type==='video'&&s.video;
-  const thumb=isVideo?"background-image:url('https://i.ytimg.com/vi/"+s.video+"/hqdefault.jpg')":'';
-  const kindLabel=isVideo?'Report '+String(i+1).padStart(2,'0'):'Update '+String(i+1).padStart(2,'0');
-  return '<button class="card" data-stop="'+i+'"><div class="thumb'+(isVideo?'':' thumb-text')+'" style="'+thumb+'"></div><div class="cardcopy"><span>'+escapeHtml(kindLabel)+' · '+escapeHtml(s.place)+'</span><h3>'+escapeHtml(s.title)+'</h3><p>'+escapeHtml(s.copy)+'</p></div></button>';
+const videoStops=stops.map((s,i)=>({s:s,i:i})).filter(x=>x.s.type==='video'&&x.s.video);
+cardsEl.innerHTML=videoStops.map((x,videoIdx)=>{
+  const s=x.s;
+  const thumb="background-image:url('https://i.ytimg.com/vi/"+s.video+"/hqdefault.jpg')";
+  const kindLabel='Report '+String(videoIdx+1).padStart(2,'0');
+  return '<button class="card" data-stop="'+x.i+'"><div class="thumb" style="'+thumb+'"></div><div class="cardcopy"><span>'+escapeHtml(kindLabel)+' · '+escapeHtml(s.place)+'</span><h3>'+escapeHtml(s.title)+'</h3><p>'+escapeHtml(s.copy)+'</p></div></button>';
 }).join('');
-if(!stops.length){cardsEl.innerHTML='<p class="report-demo-note">No reports have been released yet — the first one will appear here as soon as it\'s published.</p>';}
+if(!videoStops.length){cardsEl.innerHTML='<p class="report-demo-note">No reports have been released yet — the first one will appear here as soon as it\'s published.</p>';}
 
 document.querySelectorAll('[data-stop]').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.stop;map.flyTo([stops[i].lat,stops[i].lng],8,{duration:.8});setTimeout(()=>markers[i].openPopup(),850)}));
 
