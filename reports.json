@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "lat": 46.4825,
+    "lng": 30.7233,
+    "place": "Odesa",
+    "title": "TEST — checking the publish pipeline",
+    "type": "text",
+    "video": "",
+    "copy": "Just confirming this reaches the map correctly."
+  }
+]
