@@ -80,7 +80,7 @@ Promise.all([
   fetch('reports.json',{cache:'no-store'}).then(r=>r.ok?r.json():[]).catch(()=>[]),
   fetch('territory.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
 ]).then(([raw,territoryData])=>{
-const stops=(Array.isArray(raw)?raw:[]).map(r=>({lat:+r.lat,lng:+r.lng,place:r.place||'',title:r.title||'',video:r.video||'',copy:r.copy||'',type:r.type==='text'?'text':'video'})).filter(s=>Number.isFinite(s.lat)&&Number.isFinite(s.lng));
+const stops=(Array.isArray(raw)?raw:[]).map(r=>({lat:+r.lat,lng:+r.lng,place:r.place||'',title:r.title||'',video:r.video||'',copy:r.copy||'',type:r.type==='text'?'text':'video',route:Array.isArray(r.route)?r.route:null})).filter(s=>Number.isFinite(s.lat)&&Number.isFinite(s.lng));
 
 const captionEl=document.getElementById('mapbarCaption');
 captionEl.textContent=stops.length?(stops.length+' released report'+(stops.length===1?'':'s')):'No reports released yet — check back soon';
@@ -96,7 +96,13 @@ if(territoryData){
 }
 const cities=[['Kyiv',50.4501,30.5234,6],['Kharkiv',49.9935,36.2304,6],['Dnipro',48.4647,35.0462,6],['Odesa',46.4825,30.7233,7],['Zaporizhzhia',47.8388,35.1396,8],['Sumy',50.9077,34.7981,8],['Kramatorsk',48.7388,37.5844,9],['Poltava',49.5883,34.5514,8]];let labels=[];function drawLabels(){labels.forEach(x=>map.removeLayer(x));labels=[];const boxes=[];cities.forEach(c=>{if(map.getZoom()<c[3])return;const p=map.latLngToContainerPoint([c[1],c[2]]),w=c[0].length*7+8,b=[p.x,p.y-8,p.x+w,p.y+9];if(boxes.some(o=>b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1]))return;boxes.push(b);labels.push(L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:'city-label',html:c[0]})}).addTo(map))})}map.on('zoomend moveend',drawLabels);drawLabels();
 
-const route=stops.length?L.polyline(stops.map(s=>[s.lat,s.lng]),{color:'#d1e1e7',weight:2,opacity:.85}).addTo(map):null;
+const routeLayer=L.layerGroup().addTo(map);
+stops.forEach((s,i)=>{
+  if(i===0)return;
+  const prev=stops[i-1];
+  const path=(Array.isArray(s.route)&&s.route.length>1)?s.route:[[prev.lat,prev.lng],[s.lat,s.lng]];
+  L.polyline(path,{color:'#d1e1e7',weight:2,opacity:.85}).addTo(routeLayer);
+});
 const markers=stops.map((s,i)=>{const m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:'<div class="pin">'+(i+1)+'</div>',iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map);const videoHtml=s.type==='video'&&s.video?'<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/'+s.video+'" title="'+escapeHtml(s.title)+'" allowfullscreen></iframe></div>':'';m.bindPopup('<div class="popup"><small>'+escapeHtml(s.place)+'</small><h3>'+escapeHtml(s.title)+'</h3>'+videoHtml+'<p>'+escapeHtml(s.copy)+'</p></div>',{maxWidth:310});return m});
 
 const cardsEl=document.getElementById('reportCards');
@@ -111,9 +117,24 @@ if(!stops.length){cardsEl.innerHTML='<p class="report-demo-note">No reports have
 document.querySelectorAll('[data-stop]').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.stop;map.flyTo([stops[i].lat,stops[i].lng],8,{duration:.8});setTimeout(()=>markers[i].openPopup(),850)}));
 
 if(stops.length>1){
-function bearing(a,b){const r=d=>d*Math.PI/180,d=x=>x*180/Math.PI,p1=r(a.lat),p2=r(b.lat),dl=r(b.lng-a.lng);return(d(Math.atan2(Math.sin(dl)*Math.cos(p2),Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl)))+360)%360}
 const last=stops.length-1;
-const car=L.marker([stops[last-1].lat,stops[last-1].lng],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:'trail-dot',html:'<span></span>',iconSize:[12,12],iconAnchor:[6,6]})}).addTo(map);let start;function animate(t){if(!start)start=t;let p=((t-start)%24000)/24000;p=p<.12?0:p>.88?1:(p-.12)/.76;const ease=p*p*(3-2*p);car.setLatLng([stops[last-1].lat+(stops[last].lat-stops[last-1].lat)*ease,stops[last-1].lng+(stops[last].lng-stops[last-1].lng)*ease]);requestAnimationFrame(animate)}if(!matchMedia('(prefers-reduced-motion: reduce)').matches)requestAnimationFrame(animate);
+const lastLeg=(Array.isArray(stops[last].route)&&stops[last].route.length>1)?stops[last].route:[[stops[last-1].lat,stops[last-1].lng],[stops[last].lat,stops[last].lng]];
+const legDistances=[];let totalDistance=0;
+for(let i=1;i<lastLeg.length;i++){const d=map.distance(lastLeg[i-1],lastLeg[i]);legDistances.push(d);totalDistance+=d;}
+function pointAlong(p){
+  if(totalDistance===0)return lastLeg[0];
+  let target=p*totalDistance,covered=0;
+  for(let i=0;i<legDistances.length;i++){
+    if(covered+legDistances[i]>=target){
+      const segP=legDistances[i]?(target-covered)/legDistances[i]:0;
+      const a=lastLeg[i],b=lastLeg[i+1];
+      return[a[0]+(b[0]-a[0])*segP,a[1]+(b[1]-a[1])*segP];
+    }
+    covered+=legDistances[i];
+  }
+  return lastLeg[lastLeg.length-1];
+}
+const car=L.marker(lastLeg[0],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:'trail-dot',html:'<span></span>',iconSize:[12,12],iconAnchor:[6,6]})}).addTo(map);let start;function animate(t){if(!start)start=t;let p=((t-start)%24000)/24000;p=p<.12?0:p>.88?1:(p-.12)/.76;const ease=p*p*(3-2*p);car.setLatLng(pointAlong(ease));requestAnimationFrame(animate)}if(!matchMedia('(prefers-reduced-motion: reduce)').matches)requestAnimationFrame(animate);
 }
 });
 </script><script>(function(){const toggle=document.getElementById('bitcoin-toggle'),details=document.getElementById('bitcoin-details'),copy=document.getElementById('copy-bitcoin'),status=document.getElementById('bitcoin-status'),address=document.getElementById('bitcoin-address');if(toggle&&details){toggle.addEventListener('click',()=>{const open=details.hidden;details.hidden=!open;toggle.setAttribute('aria-expanded',String(open));});}if(copy&&address){copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(address.textContent.trim());status.textContent='Address copied.';}catch(e){status.textContent='Select and copy the address above.';}});}})();</script></body></html>
