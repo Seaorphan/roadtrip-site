@@ -109,7 +109,7 @@ if(stops.length){map.fitBounds(stops.map(s=>[s.lat,s.lng]),{padding:[75,75]});}e
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Tiles &copy; Esri'}).addTo(map);L.control.scale({imperial:false}).addTo(map);
 const territory=L.layerGroup().addTo(map);
 if(territoryData){
-  if(territoryData.hostileCountries)L.geoJSON(territoryData.hostileCountries,{interactive:false,style:{stroke:false,fillColor:'#2b3138',fillOpacity:.85,noClip:true,smoothFactor:1}}).addTo(territory);
+  if(territoryData.hostileCountries)L.geoJSON(territoryData.hostileCountries,{interactive:false,style:{color:'#cdd6d2',weight:1,opacity:.35,fillColor:'#2b3138',fillOpacity:.85,noClip:true,smoothFactor:1}}).addTo(territory);
   if(territoryData.neighborOutlines)L.geoJSON(territoryData.neighborOutlines,{interactive:false,style:{color:'#cdd6d2',weight:1,opacity:.4,fill:false,noClip:true,smoothFactor:2}}).addTo(territory);
   if(territoryData.borderFriendly)L.geoJSON(territoryData.borderFriendly,{interactive:false,style:{color:'#cdd6d2',weight:1,opacity:.55,fill:false,noClip:true,smoothFactor:4}}).addTo(territory);
   if(territoryData.borderHostile)L.geoJSON(territoryData.borderHostile,{interactive:false,style:{color:'#ff2200',weight:1.2,opacity:.75,fill:false,noClip:true,smoothFactor:4}}).addTo(territory);
@@ -117,7 +117,7 @@ if(territoryData){
   if(territoryData.uncertain)L.geoJSON(territoryData.uncertain,{interactive:false,style:{stroke:false,fillColor:'#ab955a',fillOpacity:.3,noClip:true,smoothFactor:0}}).addTo(territory);
 }
 const cities=[['Kyiv',50.4501,30.5234,6],['Kharkiv',49.9935,36.2304,6],['Dnipro',48.4647,35.0462,6],['Odesa',46.4825,30.7233,7],['Kherson',46.6354,32.6169,7],['Mykolaiv',46.9750,31.9946,8],['Zaporizhzhia',47.8388,35.1396,8],['Kryvyi Rih',47.9105,33.3918,8],['Sumy',50.9077,34.7981,8],['Kramatorsk',48.7388,37.5844,9],['Sloviansk',48.8567,37.6053,9],['Bakhmut',48.5956,38.0009,9],['Izium',49.2133,37.2483,9],['Poltava',49.5883,34.5514,8]];
-const countries=[['RUSSIA',51.2,40.5,5],['BELARUS',53.4,27.8,5],['POLAND',50.6,21.5,5],['SLOVAKIA',48.8,19.9,5],['HUNGARY',47.7,20.4,5],['ROMANIA',45.8,25.3,5],['MOLDOVA',47.2,28.6,5]];
+const countries=[['RUSSIA',51.2,40.5,5],['BELARUS',53.53,28.03,5],['POLAND',52.13,19.39,5],['SLOVAKIA',48.71,19.48,5],['HUNGARY',47.16,19.4,5],['ROMANIA',45.85,24.97,5],['MOLDOVA',47.19,28.46,5],['LITHUANIA',55.33,23.89,5],['LATVIA',56.85,24.91,5],['ESTONIA',58.69,25.83,5],['TRANSNISTRIA',47.31,29.33,7],['KALININGRAD',54.72,21.39,6]];
 let labels=[];function drawLabels(){labels.forEach(x=>map.removeLayer(x));labels=[];const boxes=[];countries.forEach(c=>{if(map.getZoom()<c[3])return;const p=map.latLngToContainerPoint([c[1],c[2]]),w=c[0].length*8+8,b=[p.x-w/2,p.y-8,p.x+w/2,p.y+9];boxes.push(b);labels.push(L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:'country-label',html:c[0]})}).addTo(map))});cities.forEach(c=>{if(map.getZoom()<c[3])return;if(stops.some(s=>Math.abs(s.lat-c[1])<0.15&&Math.abs(s.lng-c[2])<0.15))return;const p=map.latLngToContainerPoint([c[1],c[2]]),w=c[0].length*7+8,b=[p.x,p.y-8,p.x+w,p.y+9];if(boxes.some(o=>b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1]))return;boxes.push(b);labels.push(L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:'city-label',html:c[0]})}).addTo(map))})}map.on('zoomend moveend',drawLabels);drawLabels();
 
 const routeLayer=L.layerGroup().addTo(map);
