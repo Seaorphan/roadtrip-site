@@ -1,11 +1,1 @@
-[
-  {
-    "lat": 46.4825,
-    "lng": 30.7233,
-    "place": "Odesa",
-    "title": "TEST ENTRY - verifying publish pipeline",
-    "type": "text",
-    "video": "",
-    "copy": "This is a temporary automated test, will be removed."
-  }
-]
+[]
