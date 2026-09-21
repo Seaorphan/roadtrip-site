@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "lat": 46.4825,
+    "lng": 30.7233,
+    "place": "Odesa",
+    "title": "Test 1",
+    "type": "text",
+    "video": "",
+    "copy": "Test 1"
+  }
+]
