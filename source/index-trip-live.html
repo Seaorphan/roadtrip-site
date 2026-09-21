@@ -109,7 +109,8 @@ if(stops.length){map.fitBounds(stops.map(s=>[s.lat,s.lng]),{padding:[75,75]});}e
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Tiles &copy; Esri'}).addTo(map);L.control.scale({imperial:false}).addTo(map);
 const territory=L.layerGroup().addTo(map);
 if(territoryData){
-  if(territoryData.boundary)L.geoJSON(territoryData.boundary,{interactive:false,style:{color:'#cdd6d2',weight:1,opacity:.55,fill:false,noClip:true,smoothFactor:4}}).addTo(territory);
+  if(territoryData.borderFriendly)L.geoJSON(territoryData.borderFriendly,{interactive:false,style:{color:'#cdd6d2',weight:1,opacity:.55,fill:false,noClip:true,smoothFactor:4}}).addTo(territory);
+  if(territoryData.borderHostile)L.geoJSON(territoryData.borderHostile,{interactive:false,style:{color:'#ff2200',weight:1.2,opacity:.75,fill:false,noClip:true,smoothFactor:4}}).addTo(territory);
   if(territoryData.control)L.geoJSON(territoryData.control,{interactive:false,style:{className:'territory-control',color:'#ff2200',weight:1,opacity:1,fillColor:'#420000',fillOpacity:.4,noClip:true,smoothFactor:0}}).addTo(territory);
   if(territoryData.uncertain)L.geoJSON(territoryData.uncertain,{interactive:false,style:{stroke:false,fillColor:'#ab955a',fillOpacity:.3,noClip:true,smoothFactor:0}}).addTo(territory);
 }
