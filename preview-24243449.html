@@ -217,7 +217,12 @@ function pointAtDistance(target){
 // Build a timeline: pause at each stop, travel between them at a roughly
 // constant speed, then jump back to the start (not reverse) for the next lap.
 const PAUSE_MS=900;
-const desiredTravelMs=12000+stops.length*5500;
+// Pace by on-screen pixels, not stop count: the phone map is zoomed far out,
+// so a fixed duration made the dot crawl there (~3px/s vs ~14px/s on desktop).
+const PX_PER_SEC=14;
+const zoom=map.getZoom();let routePx=0;
+for(let i=1;i<fullPath.length;i++)routePx+=map.project(fullPath[i-1],zoom).distanceTo(map.project(fullPath[i],zoom));
+const desiredTravelMs=Math.max(6000,routePx/PX_PER_SEC*1000);
 const msPerMeter=totalDistance>0?desiredTravelMs/totalDistance:0;
 const timeline=[];let clock=0;
 timeline.push({type:'pause',at:0,start:clock,end:clock+PAUSE_MS});clock+=PAUSE_MS;
