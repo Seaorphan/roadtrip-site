@@ -244,7 +244,7 @@ function posAtTime(tMs){
   }
   return fullPath[0];
 }
-const car=L.marker(fullPath[0],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:'trail-dot',html:'<span></span>',iconSize:[12,12],iconAnchor:[6,6]})}).addTo(map);let start;function animate(t){if(!start)start=t;const tMs=(t-start)%cycleDuration;car.setLatLng(posAtTime(tMs));requestAnimationFrame(animate)}if(!matchMedia('(prefers-reduced-motion: reduce)').matches)requestAnimationFrame(animate);
+const car=L.marker(fullPath[0],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:'trail-dot',html:'<span></span>',iconSize:[12,12],iconAnchor:[6,6]})}).addTo(map);let start;function animate(t){if(!start)start=t;const tMs=(t-start)%cycleDuration;car.setLatLng(posAtTime(tMs));requestAnimationFrame(animate)}requestAnimationFrame(animate);
 }
 });
 </script><script>(function(){const toggle=document.getElementById('bitcoin-toggle'),details=document.getElementById('bitcoin-details'),copy=document.getElementById('copy-bitcoin'),status=document.getElementById('bitcoin-status'),address=document.getElementById('bitcoin-address');if(toggle&&details){toggle.addEventListener('click',()=>{const open=details.hidden;details.hidden=!open;toggle.setAttribute('aria-expanded',String(open));});}if(copy&&address){copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(address.textContent.trim());status.textContent='Address copied.';}catch(e){status.textContent='Select and copy the address above.';}});}})();</script>
