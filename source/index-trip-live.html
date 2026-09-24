@@ -162,7 +162,7 @@ function trackReportView(s,i){
   try{
     if(!window.goatcounter||!window.goatcounter.count)return;
     window.goatcounter.count({
-      path:'report/'+(i+1)+'-'+(s.type==='video'?'video':'text')+'-'+encodeURIComponent((s.place||'unknown').toLowerCase().replace(/\s+/g,'-')),
+      path:'report/'+(i+1)+'-'+s.type+'-'+encodeURIComponent((s.place||'unknown').toLowerCase().replace(/\s+/g,'-')),
       title:s.title||s.place||('Report '+(i+1)),
       event:true
     });
