@@ -90,7 +90,7 @@ body:after{content:'';position:fixed;z-index:-1;inset:0;background:linear-gradie
 
 <section class="journey" id="journey">
 
- <div class="mapframe"><div class="mapbar"><span id="mapbarCaption">Loading reports…</span><span>Satellite view</span></div><div id="map" class="map"></div><div class="mapnote"><span><span class="legend-pin-wrap"><span class="pin legend-pin-mini">1</span></span> Video / article report &nbsp;&nbsp; <span class="legend-swatch legend-swatch-text"></span> Text update &nbsp;&mdash;&nbsp; click a marker to view</span><span>Reports appear only after the team has safely left that location.</span></div></div><p class="territory-credit">Front-line positions from DeepStateMap.</p>
+ <div class="mapframe"><div class="mapbar"><span id="mapbarCaption">Loading reports…</span><span>Satellite view</span></div><div id="map" class="map"></div><div class="mapnote"><span><span class="legend-pin-wrap"><span class="pin legend-pin-mini">1</span></span> Video / article report &nbsp;&nbsp; <span class="legend-swatch legend-swatch-text"></span> Text update &nbsp;&mdash;&nbsp; click a marker to view</span><span>Reports appear only after the team has safely left that location.</span></div></div><p class="territory-credit" id="territoryCredit">Front-line positions from DeepStateMap.</p>
 
 </section><section class="reports" id="reports"><div class="journal-intro"><div class="kicker">The Field Journal</div><h2>Every report. A different perspective.</h2><p>The journey builds with each published story. Watch a report or explore its location on the map.</p></div><div class="cards" id="reportCards" aria-label="Reports from the road"></div></section>
 
@@ -117,6 +117,8 @@ L.geoJSON({type:'Feature',geometry:{type:'Polygon',coordinates:[[[34.0239,46.101
 L.marker([46.55,37.55],{interactive:false,icon:L.divIcon({className:'sea-label',html:'Sea of Azov'})}).addTo(map);
 const territory=L.layerGroup().addTo(map);
 if(territoryData){
+  const refreshed=territoryData.fetchedAt?new Date(territoryData.fetchedAt):null;
+  if(refreshed&&!isNaN(refreshed))document.getElementById('territoryCredit').textContent='Front-line positions from DeepStateMap, last updated '+refreshed.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'.';
   if(territoryData.hostileCountries)L.geoJSON(territoryData.hostileCountries,{interactive:false,style:{color:'#cdd6d2',weight:1,opacity:.35,fillColor:'#2b3138',fillOpacity:.85,noClip:true,smoothFactor:1}}).addTo(territory);
   if(territoryData.neighborOutlines)L.geoJSON(territoryData.neighborOutlines,{interactive:false,style:{color:'#cdd6d2',weight:1,opacity:.4,fill:false,noClip:true,smoothFactor:2}}).addTo(territory);
   if(territoryData.borderFriendly)L.geoJSON(territoryData.borderFriendly,{interactive:false,style:{color:'#cdd6d2',weight:1,opacity:.55,fill:false,noClip:true,smoothFactor:4}}).addTo(territory);
