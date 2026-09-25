@@ -84,10 +84,12 @@ body:after{content:'';position:fixed;z-index:-1;inset:0;background:linear-gradie
 </style>
 <script data-goatcounter="https://theroadtripreport.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style id="cr-link-style">.footer .cr-link{color:inherit;opacity:.85;text-decoration:underline;text-underline-offset:3px}.footer .cr-link:hover{opacity:1}</style><style id="wide-screens">
-/* Big monitors and TVs: fill the screen instead of a 1500px column, and
-   scale the text with it. Laptops, tablets and phones are untouched. */
-@media(min-width:1800px){
+/* Wide laptops, big monitors and TVs: fill the screen instead of a 1500px
+   column; from 1800px also scale the text with it. Smaller screens untouched. */
+@media(min-width:1501px){
 .shell{width:100%!important;max-width:none!important}
+}
+@media(min-width:1800px){
 .masthead{min-height:max(708px,34vw)!important}
 .masthead .hero-brand{max-width:min(48vw,1000px)!important;padding-top:max(50px,3.4vw)!important}
 .masthead .brand{font-size:clamp(100px,5.4vw,180px)!important;max-width:none!important}
