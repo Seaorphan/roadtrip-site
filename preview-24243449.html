@@ -149,10 +149,14 @@ stops.forEach((s,i)=>{
   L.polyline(path,{color:'#3d8fe0',weight:6,opacity:.45,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);
   L.polyline(path,{color:'#bfe4ff',weight:2,opacity:1,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);
 });
+// Numbered pins count main reports only, the same as the report cards, so
+// pin 10 and "Report 10" are the same thing; text updates just get a dot.
+let reportCount=0;
+const reportNumber=stops.map(s=>((s.type==='video'&&s.video)||s.type==='article'||isMediaStop(s))?++reportCount:0);
 const markers=stops.map((s,i)=>{
-  const isVideoStop=(s.type==='video'&&s.video)||s.type==='article'||isMediaStop(s);
+  const isVideoStop=reportNumber[i]>0;
   const pinHtml=isVideoStop
-    ? '<div class="pin-wrap"><div class="pin">'+(i+1)+'</div>'+(s.place?'<span class="pin-tag">'+escapeHtml(s.place)+'</span>':'')+'</div>'
+    ? '<div class="pin-wrap"><div class="pin">'+reportNumber[i]+'</div>'+(s.place?'<span class="pin-tag">'+escapeHtml(s.place)+'</span>':'')+'</div>'
     : '<div class="pin-wrap"><div class="pin-text"></div></div>';
   const m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:pinHtml,iconSize:isVideoStop?[30,30]:[14,14],iconAnchor:isVideoStop?[15,15]:[7,7]})}).addTo(map);const videoHtml=s.type==='video'&&s.video?'<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/'+s.video+'" title="'+escapeHtml(s.title)+'" allowfullscreen></iframe></div>':'';m.bindPopup('<div class="popup"><small>'+escapeHtml(s.place)+'</small><h3>'+escapeHtml(s.title)+'</h3>'+videoHtml+(isMediaStop(s)?mediaHtml(s,true):'')+'<p>'+escapeHtml(s.copy)+'</p></div>',{maxWidth:310});m.on('click',()=>trackReportView(s,i));return m});
 
