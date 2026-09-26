@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "lat": 50.45,
+    "lng": 30.52,
+    "place": "Kyiv",
+    "title": "",
+    "type": "waypoint",
+    "video": "",
+    "copy": ""
+  }
+]
