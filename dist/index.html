@@ -225,7 +225,12 @@ const countries=[['RUSSIA',51.2,40.5,5],['BELARUS',53.53,28.03,5],['POLAND',52.1
 let labels=[];function drawLabels(){const pinBoxes=stops.map((s,i)=>{const q=map.latLngToContainerPoint([s.lat,s.lng]),o=s.type==='waypoint'?[0,0]:fanOffset(i),h=pinSize(s)/2+pinHalo(s);return[q.x+o[0]-h,q.y+o[1]-h,q.x+o[0]+h,q.y+o[1]+h];});const ls=matchMedia('(min-width:1800px)').matches?1.55:(matchMedia('(min-width:900px)').matches?1.37:1);labels.forEach(x=>map.removeLayer(x));labels=[];const boxes=[];countries.forEach(c=>{if(map.getZoom()<c[3])return;const p=map.latLngToContainerPoint([c[1],c[2]]),w=(c[0].length*8+8)*ls,b=[p.x-w/2,p.y-8*ls,p.x+w/2,p.y+9*ls];boxes.push(b);labels.push(L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:'country-label',html:c[0]})}).addTo(map))});labelList().forEach(c=>{if(map.getZoom()<c[3])return;if(stops.some(s=>isMajor(s)&&Math.abs(s.lat-c[1])<0.15&&Math.abs(s.lng-c[2])<0.15))return;const p=map.latLngToContainerPoint([c[1],c[2]]),rk=[0,1.3,1.1,.98,.9][c[4]||3],w=(c[0].length*7+8)*ls*rk,top=p.y-8*ls*rk,bot=p.y+9*ls*rk;/* Only step a label round the pins sitting on its own town. Never jump it over other towns' pins: zoomed out that dragged names (Odesa, Izmail) onto the wrong place. If it can't sit beside its own town, leave it off. */const own=pinBoxes.filter((q,i)=>(Math.abs(stops[i].lat-c[1])<0.08&&Math.abs(stops[i].lng-c[2])<0.08)||(q[0]<p.x+8&&q[2]>p.x-8&&q[1]<p.y+8&&q[3]>p.y-8)),hit=(x0,dy)=>pinBoxes.some(q=>q[1]<bot+dy&&q[3]>top+dy&&q[0]<x0+w&&q[2]>x0);let shift=0,dy=0;if(hit(p.x,0)){if(!own.length)return;const R=Math.max(...own.map(q=>q[2])),Lx=Math.min(...own.map(q=>q[0])),T=Math.min(...own.map(q=>q[1])),B=Math.max(...own.map(q=>q[3])),cx=-w/2+6;/* try right, left, below, above its own pins */const opts=[[R+3-p.x,0],[Lx-3-w-p.x,0],[cx,B+2-top],[cx,T-2-bot]].find(o=>!hit(p.x+o[0],o[1]));if(!opts)return;shift=opts[0];dy=opts[1];}const b=[p.x+shift,top+dy,p.x+shift+w,bot+dy];if(boxes.some(o=>b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1]))return;boxes.push(b);labels.push(L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:'city-label r'+(c[4]||3),html:(shift||dy)?'<span style="position:relative;left:'+Math.round(shift)+'px;top:'+Math.round(dy)+'px">'+c[0]+'</span>':c[0]})}).addTo(map))})}map.on('zoomend moveend',drawLabels);drawLabels();
 
 const routeLayer=L.layerGroup().addTo(map);
-stops.forEach((s,i)=>{
+// Clicking a pin or a report card jumps the moving trail to that stop (set up with the animation below).
+let jumpTrailTo=()=>{};
+// The route draws itself behind the moving dot (see the animation below). People who
+// ask their system for reduced motion get the whole route drawn at once instead.
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(reduceMotion)stops.forEach((s,i)=>{
   if(i===0)return;
   const prev=stops[i-1];
   const path=(Array.isArray(s.route)&&s.route.length>1)?s.route:[[prev.lat,prev.lng],[s.lat,s.lng]];
@@ -247,7 +252,7 @@ const markers=stops.map((s,i)=>{
     : (isMediaUpdate?'<div class="pin-wrap"><div class="pin-update"></div></div>':'<div class="pin-wrap"><div class="pin-text"></div></div>');
   const size=isVideoStop?30:(isMediaUpdate?20:14);
   const off=fanOffset(i);
-  const m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:pinHtml,iconSize:[size,size],iconAnchor:[size/2-off[0],size/2-off[1]],popupAnchor:[off[0],off[1]-size/2]})}).addTo(map);const videoHtml=s.type==='video'&&s.video?'<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/'+s.video+'" title="'+escapeHtml(s.title)+'" allowfullscreen></iframe></div>':'';m.bindPopup('<div class="popup"><small>'+escapeHtml(s.place)+'</small><h3>'+escapeHtml(s.title)+'</h3>'+videoHtml+(isMediaStop(s)?mediaHtml(s,true):'')+'<p>'+escapeHtml(s.copy)+'</p></div>',{maxWidth:310});m.on('click',()=>trackReportView(s,i));return m});
+  const m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:pinHtml,iconSize:[size,size],iconAnchor:[size/2-off[0],size/2-off[1]],popupAnchor:[off[0],off[1]-size/2]})}).addTo(map);const videoHtml=s.type==='video'&&s.video?'<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/'+s.video+'" title="'+escapeHtml(s.title)+'" allowfullscreen></iframe></div>':'';m.bindPopup('<div class="popup"><small>'+escapeHtml(s.place)+'</small><h3>'+escapeHtml(s.title)+'</h3>'+videoHtml+(isMediaStop(s)?mediaHtml(s,true):'')+'<p>'+escapeHtml(s.copy)+'</p></div>',{maxWidth:310});m.on('click',()=>{trackReportView(s,i);jumpTrailTo(i);});return m});
 
 const cardsEl=document.getElementById('reportCards');
 const videoStops=stops.map((s,i)=>({s:s,i:i})).filter(x=>isMajor(x.s));
@@ -293,6 +298,7 @@ function trackReportView(s,i){
   const content=document.getElementById('reportModalContent');
   function closeModal(){modal.classList.add('hidden');content.innerHTML='';}
   function openReportModal(i){
+    jumpTrailTo(i);
     const s=stops[i];
     trackReportView(s,i);
     if(isMediaStop(s)){
@@ -354,24 +360,49 @@ let legStart=0;
 for(let k=1;k<stopFullPathIndex.length;k++){
   if(stops[k].type==='waypoint'&&k<stopFullPathIndex.length-1)continue;
   const fromDist=legStart,toDist=distanceAt[stopFullPathIndex[k]];
+  // Several entries at the same spot (e.g. five from Kherson) share one pause.
+  if(toDist-fromDist<300)continue;
   const travelMs=Math.max(500,(toDist-fromDist)*msPerMeter);
   timeline.push({type:'travel',fromDist,toDist,start:clock,end:clock+travelMs});clock+=travelMs;
   timeline.push({type:'pause',at:toDist,start:clock,end:clock+PAUSE_MS});clock+=PAUSE_MS;
   legStart=toDist;
 }
-const cycleDuration=clock;
-function posAtTime(tMs){
+// At the end the whole trip stays drawn for a moment, fades, and the next lap starts from a blank map.
+const END_HOLD_MS=2500,FADE_MS=800;
+const cycleDuration=clock+END_HOLD_MS;
+function distAtTime(tMs){
   for(const seg of timeline){
     if(tMs<=seg.end){
-      if(seg.type==='pause')return pointAtDistance(seg.at);
+      if(seg.type==='pause')return seg.at;
       const p=(tMs-seg.start)/(seg.end-seg.start);
       const ease=p*p*(3-2*p);
-      return pointAtDistance(seg.fromDist+(seg.toDist-seg.fromDist)*ease);
+      return seg.fromDist+(seg.toDist-seg.fromDist)*ease;
     }
   }
-  return fullPath[0];
+  return totalDistance;
 }
-const car=L.marker(fullPath[0],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:'trail-dot',html:'<span></span>',iconSize:[12,12],iconAnchor:[6,6]})}).addTo(map);let start;function animate(t){if(!start)start=t;const tMs=(t-start)%cycleDuration;car.setLatLng(posAtTime(tMs));requestAnimationFrame(animate)}requestAnimationFrame(animate);
+const car=L.marker(fullPath[0],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:'trail-dot',html:'<span></span>',iconSize:[12,12],iconAnchor:[6,6]})}).addTo(map);
+if(reduceMotion){car.setLatLng(fullPath[fullPath.length-1]);}else{
+// The wake: the same three-layer blue line as before, but only up to where the dot has got to.
+const wakeStyles=[{color:'#2173c8',weight:12,opacity:.25},{color:'#3d8fe0',weight:6,opacity:.45},{color:'#bfe4ff',weight:2,opacity:1}];
+const wake=wakeStyles.map(st=>L.polyline([],Object.assign({interactive:false,lineCap:'round',lineJoin:'round'},st)).addTo(routeLayer));
+function trailTo(d){let lo=0,hi=distanceAt.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(distanceAt[m]<=d)lo=m;else hi=m-1;}const pts=fullPath.slice(0,lo+1);if(d>distanceAt[lo])pts.push(pointAtDistance(d));return pts;}
+// The first lap waits until the map is on screen, so visitors see the trip from the very start.
+let start,lastD=-1,lastFade=1,seen=!('IntersectionObserver' in window);
+if(!seen){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){seen=true;io.disconnect();}},{threshold:.4});io.observe(document.getElementById('map'));}
+function animate(t){
+  if(!seen){requestAnimationFrame(animate);return;}
+  if(!start)start=t;
+  const tMs=(t-start)%cycleDuration,d=distAtTime(tMs);
+  const fadeAt=cycleDuration-FADE_MS,fade=tMs>fadeAt?Math.max(0,1-(tMs-fadeAt)/FADE_MS):1;
+  if(d!==lastD){const pts=trailTo(d);wake.forEach(l=>l.setLatLngs(pts));car.setLatLng(pts[pts.length-1]);lastD=d;}
+  if(fade!==lastFade){wake.forEach((l,i)=>l.setStyle({opacity:wakeStyles[i].opacity*fade}));car.setOpacity(fade);lastFade=fade;}
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+// Jump: the trail is drawn up to the clicked stop, pauses there, then carries on as normal.
+jumpTrailTo=i=>{const d=distanceAt[stopFullPathIndex[i]];const seg=timeline.find(g=>g.type==='pause'&&g.at>=d-300);if(!seg)return;seen=true;start=performance.now()-seg.start;};
+}
 }
 });
 </script><script>(function(){const toggle=document.getElementById('bitcoin-toggle'),details=document.getElementById('bitcoin-details'),copy=document.getElementById('copy-bitcoin'),status=document.getElementById('bitcoin-status'),address=document.getElementById('bitcoin-address');if(toggle&&details){toggle.addEventListener('click',()=>{const open=details.hidden;details.hidden=!open;toggle.setAttribute('aria-expanded',String(open));});}if(copy&&address){copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(address.textContent.trim());status.textContent='Address copied.';}catch(e){status.textContent='Select and copy the address above.';}});}})();</script>
