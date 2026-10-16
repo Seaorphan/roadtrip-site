@@ -511,7 +511,8 @@ for(let k=1;k<stopFullPathIndex.length;k++){
   legStart=toDist;
 }
 // At the end the whole trip stays drawn for a moment, fades, and the next lap starts from a blank map.
-const END_HOLD_MS=2500,FADE_MS=800;
+// 5 s with the whole route showing, then a slow 2.5 s fade (the fade is the end of the hold).
+const END_HOLD_MS=7500,FADE_MS=2500;
 const cycleDuration=clock+END_HOLD_MS;
 function distAtTime(tMs){
   for(const seg of timeline){
