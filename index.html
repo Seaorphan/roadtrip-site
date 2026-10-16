@@ -531,12 +531,18 @@ const wakeStyles=[{color:'#2173c8',weight:12,opacity:.25},{color:'#3d8fe0',weigh
 const wake=wakeStyles.map(st=>L.polyline([],Object.assign({interactive:false,lineCap:'round',lineJoin:'round'},st)).addTo(routeLayer));
 function trailTo(d){let lo=0,hi=distanceAt.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(distanceAt[m]<=d)lo=m;else hi=m-1;}const pts=fullPath.slice(0,lo+1);if(d>distanceAt[lo])pts.push(pointAtDistance(d));return pts;}
 // The first lap waits until the map is on screen, so visitors see the trip from the very start.
-let start,lastD=-1,lastFade=1,seen=!('IntersectionObserver' in window);
+let vt=0,lastT=null,lastD=-1,lastFade=1,seen=!('IntersectionObserver' in window);
 if(!seen){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){seen=true;io.disconnect();}},{threshold:.4});io.observe(document.getElementById('map'));}
 function animate(t){
   if(!seen){requestAnimationFrame(animate);return;}
-  if(!start)start=t;
-  const tMs=(t-start)%cycleDuration,d=distAtTime(tMs);window.__tripTick&&window.__tripTick(d);
+  // Keep the dot's on-screen speed the same at any zoom: while it is travelling, the
+  // trip clock runs slower when zoomed in (half speed per zoom level) and faster when zoomed out.
+  // Pauses and the end-of-lap fade always run at normal speed.
+  const dt=lastT===null?0:Math.min(100,t-lastT);lastT=t;
+  const seg=timeline.find(g=>vt<=g.end);
+  const rate=seg&&seg.type==='travel'?Math.pow(2,zoom-map.getZoom()):1;
+  vt=(vt+dt*rate)%cycleDuration;
+  const tMs=vt,d=distAtTime(tMs);window.__tripTick&&window.__tripTick(d);
   const fadeAt=cycleDuration-FADE_MS,fade=tMs>fadeAt?Math.max(0,1-(tMs-fadeAt)/FADE_MS):1;
   if(d!==lastD){const pts=trailTo(d);wake.forEach(l=>l.setLatLngs(pts));car.setLatLng(pts[pts.length-1]);lastD=d;}
   if(fade!==lastFade){wake.forEach((l,i)=>l.setStyle({opacity:wakeStyles[i].opacity*fade}));car.setOpacity(fade);lastFade=fade;}
@@ -544,7 +550,7 @@ function animate(t){
 }
 requestAnimationFrame(animate);
 // Jump: the trail is drawn up to the clicked stop, pauses there, then carries on as normal.
-jumpTrailTo=i=>{const d=distanceAt[stopFullPathIndex[i]];const seg=timeline.find(g=>g.type==='pause'&&g.at>=d-300);if(!seg)return;seen=true;start=performance.now()-seg.start;};
+jumpTrailTo=i=>{const d=distanceAt[stopFullPathIndex[i]];const seg=timeline.find(g=>g.type==='pause'&&g.at>=d-300);if(!seg)return;seen=true;vt=seg.start;};
 }
 }
 });
